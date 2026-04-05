@@ -1,0 +1,234 @@
+﻿<Window x:Class="HardwareMonitor.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:HardwareMonitor.ViewModels"
+        xmlns:conv="clr-namespace:HardwareMonitor.Converters"
+        Title="Hardware Monitor" Height="700" Width="900"
+        Background="#1E1E2E" FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <conv:BytesToGBConverter x:Key="BytesToGBConverter"/>
+        <conv:BytesToMBConverter x:Key="BytesToMBConverter"/>
+
+        <!-- Тёмный стиль для TabControl -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="BorderBrush" Value="#3B3B4F"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="#A0A0B8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="tabBorder" Background="#2A2A3C" Padding="14,8"
+                                CornerRadius="6,6,0,0" Margin="2,0,0,0" Cursor="Hand">
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="tabBorder" Property="Background" Value="#2563EB"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="tabBorder" Property="Background" Value="#35354A"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Тёмный стиль для кнопок -->
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="12,8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Тёмный стиль для DataGrid -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="#2A2A3C"/>
+            <Setter Property="Foreground" Value="#E0E0EE"/>
+            <Setter Property="BorderBrush" Value="#3B3B4F"/>
+            <Setter Property="RowBackground" Value="#2A2A3C"/>
+            <Setter Property="AlternatingRowBackground" Value="#242436"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#3B3B4F"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#3B3B4F"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="Foreground" Value="#8888A0"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="#2563EB"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#2563EB"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#32324A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Верхние кнопки -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Button Content="Обновить" Width="140" Height="40" Command="{Binding RefreshCommand}" Background="#6366F1" Foreground="White" FontWeight="SemiBold"/>
+            <Button Content="Экспорт данных" Width="140" Height="40" Margin="10,0,0,0" Command="{Binding ExportCommand}" Background="#8B5CF6" Foreground="White" FontWeight="SemiBold"/>
+            <Button Content="Экспорт графика" Width="160" Height="40" Margin="10,0,0,0" Command="{Binding ExportCpuGraphCommand}" Background="#A855F7" Foreground="White" FontWeight="SemiBold"/>
+            <Button Content="?" Width="40" Height="40" Margin="10,0,0,0"
+            Background="#4B5563" Foreground="White"
+            FontWeight="Bold" FontSize="18"
+            Click="HelpButton_Click"/>
+        </StackPanel>
+
+        <!-- Вкладки -->
+        <TabControl Grid.Row="1" Margin="0,10,0,0">
+
+            <!-- CPU -->
+            <TabItem Header="Процессор">
+                <ScrollViewer Background="#1E1E2E">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Загрузка процессора" FontSize="18" FontWeight="Bold" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <ProgressBar Height="20" Maximum="100" Value="{Binding CpuInfo.LoadPercentage}" Foreground="#2563EB" Background="#3B3B4F"/>
+                        <TextBlock Text="{Binding CpuInfo.LoadPercentage, StringFormat=Текущая загрузка: {0:F1}%}" Foreground="#A0A0B8" Margin="0,5,0,20" FontWeight="Bold"/>
+
+                        <TextBlock Text="График нагрузки (последняя минута)" FontWeight="SemiBold" Foreground="#A0A0B8" Margin="0,10,0,5"/>
+                        <Border Background="#111827" Height="150" CornerRadius="8" Padding="5" BorderBrush="#3B3B4F" BorderThickness="1">
+                            <Canvas Name="CpuGraphCanvas"/>
+                        </Border>
+
+                        <TextBlock Text="Название процессора:" FontWeight="Bold" Foreground="#A0A0B8" Margin="0,15,0,0"/>
+                        <TextBlock Text="{Binding CpuInfo.Name}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Производитель:" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding CpuInfo.Manufacturer}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Архитектура:" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding CpuInfo.Architecture}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Ядер:" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding CpuInfo.CoreCount}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Потоков:" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding CpuInfo.ThreadCount}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Память -->
+            <TabItem Header="Память">
+                <ScrollViewer Background="#1E1E2E">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Общий объём памяти (МБ):" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding MemoryInfo.TotalMemoryBytes, Converter={StaticResource BytesToMBConverter}}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Доступная память (МБ):" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding MemoryInfo.AvailableMemoryBytes, Converter={StaticResource BytesToMBConverter}}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                        <TextBlock Text="Использовано (%):" FontWeight="Bold" Foreground="#A0A0B8"/>
+                        <TextBlock Text="{Binding MemoryInfo.UsagePercentage}" Foreground="#E0E0EE" Margin="0,0,0,10"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Диски -->
+            <TabItem Header="Диски">
+                <ScrollViewer Background="#1E1E2E">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Логические диски:" FontWeight="Bold" Foreground="#A0A0B8" Margin="0,0,0,5"/>
+
+                        <!-- Заголовок -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="Диск" Width="50" Foreground="#8888A0" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="Всего (ГБ)" Width="100" Foreground="#8888A0" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="Свободно (ГБ)" Width="100" Foreground="#8888A0" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="Занято %" Width="80" Foreground="#8888A0" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Text="" Width="20"/>
+                            <TextBlock Text="ФС" Width="80" Foreground="#8888A0" FontWeight="Bold" FontSize="11"/>
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding DiskInfo.LogicalDisks}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#2A2A3C" CornerRadius="4" Padding="6,4" Margin="0,0,0,4">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding DriveLetter}" Width="50" Foreground="#2563EB" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding TotalSizeBytes, Converter={StaticResource BytesToGBConverter}}" Width="100" Foreground="#E0E0EE"/>
+                                            <TextBlock Text="{Binding FreeSizeBytes, Converter={StaticResource BytesToGBConverter}}" Width="100" Foreground="#10B981"/>
+                                            <TextBlock Text="{Binding UsagePercent}" Width="80" Foreground="#F59E0B"/>
+                                            <TextBlock Text="%" Foreground="#F59E0B" Width="20"/>
+                                            <TextBlock Text="{Binding FileSystem}" Width="80" Foreground="#A0A0B8"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Процессы -->
+            <TabItem Header="Процессы">
+                <StackPanel Margin="10" Background="#1E1E2E">
+                    <DataGrid ItemsSource="{Binding Processes}" SelectedItem="{Binding SelectedProcess}" AutoGenerateColumns="False" Height="400" SelectionChanged="DataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="200"/>
+                            <DataGridTextColumn Header="Состояние" Binding="{Binding Status}" Width="100"/>
+                            <DataGridTextColumn Header="CPU (%)" Binding="{Binding CpuUsage}" Width="80"/>
+                            <DataGridTextColumn Header="Память (МБ)" Binding="{Binding MemoryBytes}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="Снять задачу" Width="140" Height="35" Margin="0,10,0,0" Command="{Binding KillProcessCommand}" Background="#EF4444" Foreground="White" FontWeight="Bold"/>
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
+
